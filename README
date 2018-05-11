@@ -1,3 +1,7 @@
-When complete, will be able to:
+Under construction using the biopython and pdfminer packages.
+Data is collected using the NCBI Entrez E-Utilities API.
+
+Objectives:
 - ingest articles in PDF form and output them as text.
 - retrieve article data given a file containing PMIDs
+- output article properties to .csv format

@@ -5,6 +5,8 @@ import csv
 
 # File containing line-separated Pubmed IDs
 PMID_FILE = 'pmid_input/pmid_sample.txt'
+NCBI_EMAIL = 'user@example.com'
+NCBI_KEY = '####################################'
 
 
 def ids_from_file(filename):
@@ -13,7 +15,7 @@ def ids_from_file(filename):
     Due to memory restrictions with Entrez.read, PMIDs are batched in groups of 200.
     """
 
-    result = [[]]
+    result = [[]]  # A list containing an empty list.
     count = 0
 
     with open(filename, 'r') as f_in:
@@ -74,8 +76,8 @@ if __name__ == '__main__':
 
     pmid_list = ids_from_file(PMID_FILE)
 
-    Entrez.email = ''  # Provide an e-mail address for NCBI
-    Entrez.api_key = '####################################'
+    Entrez.email = NCBI_EMAIL
+    Entrez.api_key = NCBI_KEY
 
     for sublist in pmid_list:
 
