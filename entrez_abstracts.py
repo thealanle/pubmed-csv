@@ -4,13 +4,11 @@ from Bio import Entrez
 import csv
 
 
-# The config file should consist of two lines, of the format:
+# The config file should consist of three lines, of the format:
 # <user@example.com>
 # <NCBI_api_key>
+# <path/to/pmids.txt>
 CONFIG_PATH = 'pubmed-csv-config.txt'
-
-# File containing line-separated Pubmed IDs
-PMID_PATH = 'pmid_input/pmid_sample.txt'
 
 
 def config_setup(path):
@@ -22,12 +20,14 @@ def config_setup(path):
 
     email = None
     api_key = None
+    pmid_path = None
 
     try:
         with open(path, 'r') as config:
             print("Config file found at {}".format(path))
-            email = config.readline()
-            api_key = config.readline()
+            email = config.readline().strip()
+            api_key = config.readline().strip()
+            pmid_path = config.readline().strip()
     except FileNotFoundError:
         query = input(
             "No config file found at '{}'. Create a config file now? y/N\n >".format(path)).lower()
@@ -37,15 +37,17 @@ def config_setup(path):
         else:
             email = input("Input an e-mail address for use with NCBI:\n>")
             api_key = input("Input NCBI API key:\n>")
+            pmid_path = input("Input path to file containing PMIDs:\n>")
             with open(path, 'w') as config:
                 config.write(email)
                 config.write(api_key)
+                config.write(pmid_path)
             print("Config file created at {}".format(path))
 
-    return (email, api_key)
+    return (email, api_key, pmid_path)
 
 
-def ids_from_file(filename):
+def ids_from_file(filepath):
     """
     Given a file with a PMID on each line, returns a list of lists containing
     PMIDs as strings. Due to memory restrictions with Entrez.read, PMIDs are
@@ -55,12 +57,13 @@ def ids_from_file(filename):
     result = [[]]  # A list containing an empty list.
     count = 0
 
-    with open(filename, 'r') as f_in:
+    with open(filepath, 'r') as f_in:
         for line in f_in:
             if count < 200:
                 result[-1].append(line.strip())
                 count += 1
             else:
+                # Create a new sublist once a group of 200 is reached.
                 result.append([line.strip()])
                 count = 1
 
@@ -112,9 +115,8 @@ def write_csv_file(pmid, title, abstract, f_out):
 
 if __name__ == '__main__':
 
-    Entrez.email, Entrez.api_key = config_setup(CONFIG_PATH)
-
-    pmid_list = ids_from_file(PMID_PATH)
+    Entrez.email, Entrez.api_key, pmid_path = config_setup(CONFIG_PATH)
+    pmid_list = ids_from_file(pmid_path)
 
     for sublist in pmid_list:
 
@@ -124,11 +126,11 @@ if __name__ == '__main__':
 
             records = Entrez.read(handle)
 
-            # Writes to a .csv file
+            # Writes to a .csv file in 'append' mode.
             with open('abstracts_out.csv', 'a') as csv_out:
 
-                writer = csv.writer(csv_out)
-                writer.writerow(['PMID', 'Title', 'Abstract'])
+                csv_writer = csv.writer(csv_out)
+                csv_writer.writerow(['PMID', 'Title', 'Abstract'])
 
                 for record in records['PubmedArticle']:
                     pmid_text = record['MedlineCitation']['PMID']
