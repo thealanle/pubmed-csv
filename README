@@ -1,0 +1,3 @@
+When complete, will be able to:
+- ingest articles in PDF form and output them as text.
+- retrieve article data given a file containing PMIDs
