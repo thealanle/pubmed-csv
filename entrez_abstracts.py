@@ -2,49 +2,10 @@
 
 from Bio import Entrez
 import csv
+import configurator
 
 
-# The config file should consist of three lines, of the format:
-# <user@example.com>
-# <NCBI_api_key>
-# <path/to/pmids.txt>
-CONFIG_PATH = 'pubmed-csv-config.txt'
-
-
-def config_setup(path):
-    """
-    Given a path to the config file, returns a tuple:
-    (user@example.com, <NCBI_api_key>)
-    If the config file does not exist, user is prompted to create one.
-    """
-
-    email = None
-    api_key = None
-    pmid_path = None
-
-    try:
-        with open(path, 'r') as config:
-            print("Config file found at {}".format(path))
-            email = config.readline().strip()
-            api_key = config.readline().strip()
-            pmid_path = config.readline().strip()
-    except FileNotFoundError:
-        query = input(
-            "No config file found at '{}'. Create a config file now? y/N\n >".format(path)).lower()
-        if query != 'y':
-            print("No config file will be created.")
-            pass
-        else:
-            email = input("Input an e-mail address for use with NCBI:\n>")
-            api_key = input("Input NCBI API key:\n>")
-            pmid_path = input("Input path to file containing PMIDs:\n>")
-            with open(path, 'w') as config:
-                config.write(email)
-                config.write(api_key)
-                config.write(pmid_path)
-            print("Config file created at {}".format(path))
-
-    return (email, api_key, pmid_path)
+CONFIG_FILE = 'pubmed-csv.cfg'
 
 
 def ids_from_file(filepath):
@@ -114,8 +75,13 @@ def write_csv_file(pmid, title, abstract, f_out):
 
 
 if __name__ == '__main__':
+    config = configurator.setup(CONFIG_FILE)
 
-    Entrez.email, Entrez.api_key, pmid_path = config_setup(CONFIG_PATH)
+    Entrez.email = config['User']['Email']
+    Entrez.api_key = config['User']['API key']
+    pmid_path = config['Paths']['PMID Input']
+    output_file = config['Paths']['Output Filename']
+
     pmid_list = ids_from_file(pmid_path)
 
     for sublist in pmid_list:
@@ -127,7 +93,7 @@ if __name__ == '__main__':
             records = Entrez.read(handle)
 
             # Writes to a .csv file in 'append' mode.
-            with open('abstracts_out.csv', 'a') as csv_out:
+            with open(output_file, 'a') as csv_out:
 
                 csv_writer = csv.writer(csv_out)
                 csv_writer.writerow(['PMID', 'Title', 'Abstract'])
