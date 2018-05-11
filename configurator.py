@@ -3,6 +3,8 @@
 import configparser
 import os
 
+DEFAULT_CFG = 'pubmed-csv.cfg'
+
 
 def new_cfg(filename):
     """
@@ -22,6 +24,7 @@ def new_cfg(filename):
         "Path to file containing PMIDs:\n>").strip()
     config['Paths']['Output Filename'] = input("Output filename:\n>").strip()
 
+    # Write properties to file.
     with open(filename, 'w') as configfile:
         config.write(configfile)
 
@@ -31,9 +34,16 @@ def new_cfg(filename):
 
 
 def setup(filename):
+    """
+    Ingests or creates a .cfg file. The result is a ConfigParser() object.
+    """
+
     result = None
+
+    # Read the .cfg file. If it does not exist, create one and query user for properties.
     if os.path.isfile(filename):
         result = configparser.ConfigParser()
+        # .read(filename) is an in-place operation and must be called before returning result
         result.read(filename)
     else:
         result = new_cfg(filename)
@@ -41,4 +51,4 @@ def setup(filename):
 
 
 if __name__ == '__main__':
-    setup('pubmed-csv.cfg')
+    setup(DEFAULT_CFG)
