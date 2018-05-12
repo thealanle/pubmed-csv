@@ -21,6 +21,7 @@ def ids_from_file(filepath):
     with open(filepath, 'r') as f_in:
         for line in f_in:
             if count < 200:
+                # Append to the last sublist in the list
                 result[-1].append(line.strip())
                 count += 1
             else:
@@ -66,12 +67,21 @@ def write_txt_file(title, abstract, f_out):
     )
 
 
-def write_csv_file(pmid, title, abstract, f_out):
+def write_csv_file(records, output_file):
     """
-    Writes article properties to a given output .csv file.
+    Writes rows to output_file in append mode, which is required for datasets
+    with more than 200 articles.
     """
-    writer = csv.writer(f_out)
-    writer.writerow([pmid, title, abstract])
+    with open(output_file, 'a') as csv_out:
+
+        csv_writer = csv.writer(csv_out)
+        csv_writer.writerow(['PMID', 'Title', 'Abstract'])
+
+        for record in records['PubmedArticle']:
+            pmid_text = record['MedlineCitation']['PMID']
+            title_text = record['MedlineCitation']['Article']['ArticleTitle']
+            abs_text = get_abs_text(record)
+            csv_writer.writerow([pmid_text, title_text, abs_text])
 
 
 if __name__ == '__main__':
@@ -79,34 +89,12 @@ if __name__ == '__main__':
 
     Entrez.email = config['User']['Email']
     Entrez.api_key = config['User']['API key']
-    pmid_path = config['Paths']['PMID Input']
     output_file = config['Paths']['Output Filename']
-
-    pmid_list = ids_from_file(pmid_path)
+    pmid_list = ids_from_file(config['Paths']['PMID Input'])
 
     for sublist in pmid_list:
-
-        with Entrez.efetch(db='pubmed',
-                           id=','.join(sublist),
+        with Entrez.efetch(db='pubmed', id=','.join(sublist),
                            retmode='xml') as handle:
-
             records = Entrez.read(handle)
 
-            # Writes to a .csv file in 'append' mode.
-            with open(output_file, 'a') as csv_out:
-
-                csv_writer = csv.writer(csv_out)
-                csv_writer.writerow(['PMID', 'Title', 'Abstract'])
-
-                for record in records['PubmedArticle']:
-                    pmid_text = record['MedlineCitation']['PMID']
-                    title_text = record['MedlineCitation']['Article']['ArticleTitle']
-                    abs_text = get_abs_text(record)
-                    write_csv_file(pmid_text, title_text,
-                                   abs_text, csv_out)
-
-            # # Writes to a .txt file. TO-DO: Implement write_txt_file.
-            # with open('abstracts_out.txt', 'a') as txt_out:
-            #     for record in records['PubmedArticle']:
-            #         title_text = record['MedlineCitation']['Article']['ArticleTitle']
-            #         abs_text = get_abs_text(record)
+            write_csv_file(records, output_file)
