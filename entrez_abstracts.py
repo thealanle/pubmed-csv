@@ -84,17 +84,24 @@ def write_csv_file(records, output_file):
             csv_writer.writerow([pmid_text, title_text, abs_text])
 
 
-if __name__ == '__main__':
-    config = configurator.setup(CONFIG_FILE)
-
-    Entrez.email = config['User']['Email']
-    Entrez.api_key = config['User']['API key']
-    output_file = config['Paths']['Output Filename']
-    pmid_list = ids_from_file(config['Paths']['PMID Input'])
-
+def fetch(pmid_list):
+    """
+    Given a list of lists of PMIDs, fetches an XML containing article
+    properties, which are then written out to a .csv
+    """
     for sublist in pmid_list:
         with Entrez.efetch(db='pubmed', id=','.join(sublist),
                            retmode='xml') as handle:
             records = Entrez.read(handle)
 
-            write_csv_file(records, output_file)
+        write_csv_file(records, output_file)
+
+
+if __name__ == '__main__':
+    config = configurator.setup(CONFIG_FILE)
+    Entrez.email = config['User']['Email']
+    Entrez.api_key = config['User']['API key']
+    output_file = config['Paths']['Output Filename']
+    pmid_list = ids_from_file(config['Paths']['PMID Input'])
+
+    fetch(pmid_list)
