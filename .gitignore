@@ -1,21 +1,5 @@
-
-*output*/
-abstracts_out.csv
-efetch_example.xml
-entrez_abstracts.py
-Fatigue 2018.04.16.ods
-get_web_abstracts.py
-markov.py
-pain.csv
-pdf_convert.sh
-pdf_input
-pdf_txt_output
-pmid_input/*
+*
 !pmid_input/pmid_sample.txt
-pubmed-csv-config.txt
-__pycache__
-README.md
-reset.sh
-subobj
-xml_input
-*.cfg
+!README.md
+!configurator.py
+!entrez_abstracts.py
