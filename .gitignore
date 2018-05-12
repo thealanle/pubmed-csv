@@ -10,7 +10,8 @@ pain.csv
 pdf_convert.sh
 pdf_input
 pdf_txt_output
-pmid_input
+pmid_input/*
+!pmid_input/pmid_sample.txt
 pubmed-csv-config.txt
 __pycache__
 README.md
