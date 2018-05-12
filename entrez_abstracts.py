@@ -9,10 +9,11 @@ CONFIG_FILE = 'pubmed-csv.cfg'
 
 
 def ids_from_file(filepath):
-    """
-    Given a file with a PMID on each line, returns a list of lists containing
-    PMIDs as strings. Due to memory restrictions with Entrez.read, PMIDs are
-    batched in groups of 200.
+    """Return a list of lists containing PMIDs as strings.
+
+    Takes a file with a PMID on each line. To avoid hitting memory limits with
+    Entrez.read, PMIDs are batched in sublists of no more than 200 entries.
+
     """
 
     result = [[]]  # A list containing an empty list.
@@ -33,9 +34,10 @@ def ids_from_file(filepath):
 
 
 def get_abs_text(record):
-    """
-    Given a record from Entrez.read(handle), attempt to return a string
-    containing the text of the article's abstract.
+    """Return a string containing the contents of the article's abstract.
+
+    Given a record file, this script attempts to access the record's abstract.
+    If found, the abstract is returned as a string.
     """
 
     result = []
@@ -95,6 +97,14 @@ def fetch(pmid_list):
             records = Entrez.read(handle)
 
         write_csv_file(records, output_file)
+
+
+def search():
+    """
+    [Not yet implemented!]
+    Wrapper for the Entrez.esearch function.
+    """
+    pass
 
 
 if __name__ == '__main__':
