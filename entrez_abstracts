@@ -86,17 +86,51 @@ def write_csv_file(records, output_file):
             csv_writer.writerow([pmid_text, title_text, abs_text])
 
 
-def fetch(pmid_list):
+def fetch(id_list):
     """
-    Given a list of lists of PMIDs, fetches an XML containing article
+    Given a list of lists of IDs, fetches an XML containing article
     properties, which are then written out to a .csv
     """
-    for sublist in pmid_list:
-        with Entrez.efetch(db='pubmed', id=','.join(sublist),
+    database = 'pmc' if 'PMC' in id_list[0][0] else 'pubmed'
+    print(database)
+    for sublist in id_list:
+        with Entrez.efetch(db=database, id=','.join(sublist),
                            retmode='xml') as handle:
             records = Entrez.read(handle)
 
         write_csv_file(records, output_file)
+
+
+def write_csv_fulltext(records, output_file):
+    """
+    Writes rows to output_file in append mode, which is required for datasets
+    with more than 200 articles.
+    """
+    with open(output_file, 'a') as csv_out:
+
+        csv_writer = csv.writer(csv_out)
+        csv_writer.writerow(['PMCID', 'Title', 'Abstract'])
+
+        for record in records['PubmedArticle']:
+            pmid_text = record['MedlineCitation']['PMCID']
+            title_text = record['MedlineCitation']['Article']['ArticleTitle']
+            abs_text = get_abs_text(record)
+            csv_writer.writerow([pmid_text, title_text, abs_text])
+
+
+def fetch_fulltext(id_list):
+    """
+    Given a list of lists of IDs, fetches an XML containing article
+    properties, which are then written out to a .csv
+    """
+    database = 'pmc' if 'PMC' in id_list[0][0] else 'pubmed'
+    print(database)
+    for sublist in id_list:
+        with Entrez.efetch(db=database, id=','.join(sublist),
+                           retmode='xml') as handle:
+            records = Entrez.read(handle)
+
+        write_csv_fulltext(records, output_file)
 
 
 def search():
@@ -113,5 +147,6 @@ if __name__ == '__main__':
     Entrez.api_key = config['User']['API key']
     output_file = config['Paths']['Output Filename']
     pmid_list = ids_from_file(config['Paths']['PMID Input'])
+    pmcid_list = ids_from_file(config['Paths']['PMCID Input'])
 
-    fetch(pmid_list)
+    fetch_fulltext(pmcid_list)
