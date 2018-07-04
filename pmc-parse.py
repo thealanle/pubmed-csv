@@ -21,15 +21,42 @@ class Library:
         # TODO: Create a list in which each element is a BeautifulSoup Tag
         # corresponding to a journal article.
         for article in soup.find_all(['article']):
+<<<<<<< HEAD:ft-parse.py
             doc = Document(article)
             self.add_doc(doc)
             # print(doc.meta['body'])
+=======
+            try:
+                doc = Document(article)
+                self.add_doc(doc)
+                # print(doc.meta['body'])
+            except AttributeError:
+                pass
+
+    # TODO: Update to use PMID or PMCID instead of title
+    def add_doc(self, doc):
+        self.docs[doc.meta['article-title']] = doc
+>>>>>>> develop:pmc-parse.py
 
     def export_csv(self, filename):  # Not yet implemented
-        writer = csv.writer
+        headers = [
+            'journal-title',
+            'article-title',
+            'first-author',
+            'year',
+            'body'
+        ]
 
+<<<<<<< HEAD:ft-parse.py
     def add_doc(self, doc):
         self.docs[doc.meta['journal-title']] = doc
+=======
+        with open(filename, encoding='utf-8', mode='w', newline='\n') as f_out:
+            writer = csv.DictWriter(f_out, fieldnames=headers)
+            writer.writeheader()
+            for doc in self.docs.values():
+                writer.writerow(doc.meta)
+>>>>>>> develop:pmc-parse.py
 
 
 class Document:
@@ -52,7 +79,14 @@ class Document:
         summary = [doc.meta['article-title'],
                    doc.meta['first-author'] + ' ' + doc.meta['year'],
                    doc.meta['body']]
+<<<<<<< HEAD:ft-parse.py
         return('\n'.join(summary))
+=======
+        try:
+            return '\n'.join(summary)
+        except TypeError:
+            return ''
+>>>>>>> develop:pmc-parse.py
 
     def get_body(self, body, inline=True):
 
@@ -79,6 +113,7 @@ def print_pmids(article):
         # pmid 19686402
 
 
+<<<<<<< HEAD:ft-parse.py
 def print_all(article):
     text_list = article.find_all('p')
     for each in text_list:
@@ -112,7 +147,13 @@ def print_body(article):
     print(' '.join(text_list))
 
 
+=======
+>>>>>>> develop:pmc-parse.py
 if __name__ == '__main__':
-    library = Library("xml_input/efetch-pmc.xml")
+    library = Library("xml_input/pmcids-mini.xml")
     for doc in library.docs.values():
         print(doc, '\n')
+<<<<<<< HEAD:ft-parse.py
+=======
+    library.export_csv('test.csv')
+>>>>>>> develop:pmc-parse.py
