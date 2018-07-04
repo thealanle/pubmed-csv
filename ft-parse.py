@@ -2,20 +2,64 @@
 
 from bs4 import BeautifulSoup
 import csv
+import collections
 
 
 class Library:
     """
     TODO: Implement a container to enable access and modification of Documents.
     """
-    pass
+
+    def __init__(self, filename):
+        data_in = open(filename)
+        contents = data_in.read()
+        soup = BeautifulSoup(contents, 'xml')
+        data_in.close()
+
+        self.docs = collections.OrderedDict()
+
+        # TODO: Create a list in which each element is a BeautifulSoup Tag
+        # corresponding to a journal article.
+        for article in soup.find_all(['article']):
+            doc = Document(article)
+            self.add_doc(doc)
+            # print(doc.metadata['body'])
+
+    def export_csv(self, filename):  # Not yet implemented
+        writer = csv.writer
+
+    def add_doc(self, doc):
+        self.docs[doc.metadata['journal-title']] = doc
 
 
 class Document:
     """
-    TODO: Implement a class representation of each journal article.
+    An article with its properties parsed out for access and modification.
     """
-    pass
+
+    def __init__(self, article):
+        front = article.find('front')
+        body = article.find('body')
+        self.metadata = {
+            'journal-title': front.find('journal-title').string,
+            'article-title': front.find('article-title').string,
+            'first_author': front.find('contrib').find('surname').string,
+            'year': front.find('year').string,
+            'body': self.get_body(body),
+        }
+
+    def get_body(self, body, inline=True):
+
+        # Make a list of all strings under <p> tags
+        p_list = [p.get_text()
+                  for p in body.find_all('p') if p.parent.name == 'sec']
+
+        text_list = [p.replace('\n', '') for p in p_list]
+
+        if inline:
+            return ' '.join(text_list)
+        else:
+            return '\n'.join(text_list)
 
 
 def print_pmids(article):
@@ -38,13 +82,16 @@ def print_all(article):
 
 def print_metadata(article):
     front = article.find('front')
+
     journal_title = front.find('journal-title').string
     print(journal_title)
+
     article_title = front.find('article-title').string
     print(article_title)
+
     first_author = front.find('contrib').find('surname').string
-    author_date = first_author + ' ' + article.find('year').string
-    print(author_date)
+    date = front.find('year').string
+    print(first_author, date)
 
 
 def print_abstract(article):
@@ -54,30 +101,14 @@ def print_abstract(article):
 
 def print_body(article):
     body = article.find('body')
-    p_temp = body.find_all('p')
-    p_list = [p.get_text() for p in p_temp if p.parent.name ==
+    p_list = [p.get_text() for p in body.find_all('p') if p.parent.name ==
               'sec']
-    # secs = [sec for sec in body.find_all(
-    #     'sec') if 'supplementary' not in sec.attrs['sec-type']]
-    #
-    # print(secs.get_text())
-    text_list = []
-    for p in p_list:
-        text_list.append(p.replace('\n', ''))
+    text_list = [p.replace('\n', '') for p in p_list]
     print(' '.join(text_list))
 
 
 if __name__ == '__main__':
-
-    data_in = open("xml_input/efetch-pmc.xml")
-    contents = data_in.read()
-    soup = BeautifulSoup(contents, 'xml')
-    data_in.close()
-
-    article_list = soup.find_all(['article'])
-    # print_all(article_list)
-    for article in article_list:
-        print_metadata(article)
-        # print_abstract(article)
-        # Testing merge
-        print_body(article)
+    library = Library("xml_input/efetch-pmc.xml")
+    for doc in library.docs.values():
+        print(doc.metadata['article-title'])
+        print(doc.metadata['body'])
