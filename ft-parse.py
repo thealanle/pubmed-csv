@@ -8,7 +8,13 @@ class Library:
     """
     TODO: Implement a container to enable access and modification of Documents.
     """
-    pass
+
+    def __init__(self, filename):
+        data_in = open(filename)
+        contents = data_in.read()
+        soup = BeautifulSoup(contents, 'xml')
+        data_in.close()
+        self.article_list = soup.find_all(['article'])
 
 
 class Document:
@@ -54,30 +60,14 @@ def print_abstract(article):
 
 def print_body(article):
     body = article.find('body')
-    p_temp = body.find_all('p')
-    p_list = [p.get_text() for p in p_temp if p.parent.name ==
+    p_list = [p.get_text() for p in body.find_all('p') if p.parent.name ==
               'sec']
-    # secs = [sec for sec in body.find_all(
-    #     'sec') if 'supplementary' not in sec.attrs['sec-type']]
-    #
-    # print(secs.get_text())
-    text_list = []
-    for p in p_list:
-        text_list.append(p.replace('\n', ''))
+    text_list = [p.replace('\n', '') for p in p_list]
     print(' '.join(text_list))
 
 
 if __name__ == '__main__':
-
-    data_in = open("xml_input/efetch-pmc.xml")
-    contents = data_in.read()
-    soup = BeautifulSoup(contents, 'xml')
-    data_in.close()
-
-    article_list = soup.find_all(['article'])
-    # print_all(article_list)
-    for article in article_list:
+    library = Library("xml_input/efetch-pmc.xml")
+    for article in library.article_list:
         print_metadata(article)
-        # print_abstract(article)
-        # Testing merge
         print_body(article)
