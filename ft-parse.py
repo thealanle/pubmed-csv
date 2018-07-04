@@ -79,4 +79,5 @@ if __name__ == '__main__':
     for article in article_list:
         print_metadata(article)
         # print_abstract(article)
+        # Testing merge
         print_body(article)
