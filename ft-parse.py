@@ -4,7 +4,14 @@ from bs4 import BeautifulSoup
 import csv
 
 
-class Article:
+class Library:
+    """
+    TODO: Implement a container to enable access and modification of Documents.
+    """
+    pass
+
+
+class Document:
     """
     TODO: Implement a class representation of each journal article.
     """
