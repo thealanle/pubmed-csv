@@ -2,6 +2,7 @@
 
 from bs4 import BeautifulSoup
 import csv
+# import collections
 
 
 class Library:
@@ -14,14 +15,36 @@ class Library:
         contents = data_in.read()
         soup = BeautifulSoup(contents, 'xml')
         data_in.close()
-        self.article_list = soup.find_all(['article'])
+
+        # TODO: Create a list in which each element is a BeautifulSoup Tag
+        # corresponding to a journal article.
+        self.articles = soup.find_all(['article'])
+
+    def export_csv(self, filename):  # Not yet implemented
+        writer = csv.writer
 
 
 class Document:
     """
-    TODO: Implement a class representation of each journal article.
+    An article with its properties parsed out for access and modification.
     """
-    pass
+
+    def __init__(self, article):
+        front = article.find('front')
+        self.metadata = {
+            'journal-title': front.find('journal-title').string,
+            'article-title': front.find('article-title').string,
+            'first_author': front.find('contrib').find('surname').string,
+            'year': front.find('year').string,
+            'fulltext': self.fulltext(article),
+        }
+
+    def fulltext(self, article):
+        body = article.find('body')
+        p_list = [p.get_text()
+                  for p in body.find_all('p') if p.parent.name == 'sec']
+        text_list = [p.replace('\n', '') for p in p_list]
+        return ' '.join(text_list)
 
 
 def print_pmids(article):
@@ -44,13 +67,16 @@ def print_all(article):
 
 def print_metadata(article):
     front = article.find('front')
+
     journal_title = front.find('journal-title').string
     print(journal_title)
+
     article_title = front.find('article-title').string
     print(article_title)
+
     first_author = front.find('contrib').find('surname').string
-    author_date = first_author + ' ' + article.find('year').string
-    print(author_date)
+    date = front.find('year').string
+    print(first_author, date)
 
 
 def print_abstract(article):
@@ -68,6 +94,7 @@ def print_body(article):
 
 if __name__ == '__main__':
     library = Library("xml_input/efetch-pmc.xml")
-    for article in library.article_list:
-        print_metadata(article)
-        print_body(article)
+    for article in library.articles:
+        doc = Document(article)
+        # print_metadata(article)
+        # print_body(article)
