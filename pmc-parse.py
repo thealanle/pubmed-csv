@@ -21,9 +21,12 @@ class Library:
         # TODO: Create a list in which each element is a BeautifulSoup Tag
         # corresponding to a journal article.
         for article in soup.find_all(['article']):
-            doc = Document(article)
-            self.add_doc(doc)
-            # print(doc.meta['body'])
+            try:
+                doc = Document(article)
+                self.add_doc(doc)
+                # print(doc.meta['body'])
+            except AttributeError:
+                pass
 
     # TODO: Update to use PMID or PMCID instead of title
     def add_doc(self, doc):
@@ -37,6 +40,7 @@ class Library:
             'year',
             'body'
         ]
+
         with open(filename, encoding='utf-8', mode='w', newline='\n') as f_out:
             writer = csv.DictWriter(f_out, fieldnames=headers)
             writer.writeheader()
@@ -64,7 +68,10 @@ class Document:
         summary = [doc.meta['article-title'],
                    doc.meta['first-author'] + ' ' + doc.meta['year'],
                    doc.meta['body']]
-        return('\n'.join(summary))
+        try:
+            return '\n'.join(summary)
+        except TypeError:
+            return ''
 
     def get_body(self, body, inline=True):
 
@@ -91,41 +98,8 @@ def print_pmids(article):
         # pmid 19686402
 
 
-def print_all(article):
-    text_list = article.find_all('p')
-    for each in text_list:
-        print(each.get_text())
-
-
-def print_meta(article):
-    front = article.find('front')
-
-    journal_title = front.find('journal-title').string
-    print(journal_title)
-
-    article_title = front.find('article-title').string
-    print(article_title)
-
-    first_author = front.find('contrib').find('surname').string
-    date = front.find('year').string
-    print(first_author, date)
-
-
-def print_abstract(article):
-    abstract = article.find('abstract')
-    print(abstract.get_text(), end='')
-
-
-def print_body(article):
-    body = article.find('body')
-    p_list = [p.get_text() for p in body.find_all('p') if p.parent.name ==
-              'sec']
-    text_list = [p.replace('\n', '') for p in p_list]
-    print(' '.join(text_list))
-
-
 if __name__ == '__main__':
-    library = Library("xml_input/efetch-pmc.xml")
-    # for doc in library.docs.values():
-    #     print(doc, '\n')
+    library = Library("xml_input/pmcids-mini.xml")
+    for doc in library.docs.values():
+        print(doc, '\n')
     library.export_csv('test.csv')
