@@ -23,13 +23,14 @@ class Library:
         for article in soup.find_all(['article']):
             doc = Document(article)
             self.add_doc(doc)
-            # print(doc.metadata['body'])
+            # print(doc.meta['body'])
 
     def export_csv(self, filename):  # Not yet implemented
         writer = csv.writer
 
+    # TODO: Update to use PMID or PMCID instead of title
     def add_doc(self, doc):
-        self.docs[doc.metadata['journal-title']] = doc
+        self.docs[doc.meta['article-title']] = doc
 
 
 class Document:
@@ -40,21 +41,26 @@ class Document:
     def __init__(self, article):
         front = article.find('front')
         body = article.find('body')
-        self.metadata = {
+        self.meta = {
             'journal-title': front.find('journal-title').string,
             'article-title': front.find('article-title').string,
-            'first_author': front.find('contrib').find('surname').string,
+            'first-author': front.find('contrib').find('surname').string,
             'year': front.find('year').string,
             'body': self.get_body(body),
         }
 
+    def __str__(self):
+        summary = [doc.meta['article-title'],
+                   doc.meta['first-author'] + ' ' + doc.meta['year'],
+                   doc.meta['body']]
+        return('\n'.join(summary))
+
     def get_body(self, body, inline=True):
 
         # Make a list of all strings under <p> tags
-        p_list = [p.get_text()
-                  for p in body.find_all('p') if p.parent.name == 'sec']
-
-        text_list = [p.replace('\n', '') for p in p_list]
+        temp = [p.get_text()
+                for p in body.find_all('p') if p.parent.name == 'sec']
+        text_list = [p.replace('\n', '') for p in temp]
 
         if inline:
             return ' '.join(text_list)
@@ -80,7 +86,7 @@ def print_all(article):
         print(each.get_text())
 
 
-def print_metadata(article):
+def print_meta(article):
     front = article.find('front')
 
     journal_title = front.find('journal-title').string
@@ -110,5 +116,4 @@ def print_body(article):
 if __name__ == '__main__':
     library = Library("xml_input/efetch-pmc.xml")
     for doc in library.docs.values():
-        print(doc.metadata['article-title'])
-        print(doc.metadata['body'])
+        print(doc, '\n')
