@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from bs4 import BeautifulSoup
+import csv
 
 
 class Article:
@@ -37,30 +38,25 @@ def print_metadata(article):
     first_author = front.find('contrib').find('surname').string
     author_date = first_author + ' ' + article.find('year').string
     print(author_date)
-    print('\n')
-    # for child in front:
-    #     print(front.get_text())
 
 
 def print_abstract(article):
     abstract = article.find('abstract')
-
-    print(abstract.get_text())
+    print(abstract.get_text(), end='')
 
 
 def print_body(article):
     body = article.find('body')
     p_temp = body.find_all('p')
-    p_list = [p for p in p_temp if p.parent.name ==
-              'sec' and p.get_text != '\n']
-    text_list = []
+    p_list = [p.get_text() for p in p_temp if p.parent.name ==
+              'sec']
     # secs = [sec for sec in body.find_all(
     #     'sec') if 'supplementary' not in sec.attrs['sec-type']]
     #
     # print(secs.get_text())
+    text_list = []
     for p in p_list:
-        text_list.append(p.get_text())
-
+        text_list.append(p.replace('\n', ''))
     print(' '.join(text_list))
 
 
@@ -73,8 +69,7 @@ if __name__ == '__main__':
 
     article_list = soup.find_all(['article'])
     # print_all(article_list)
-
     for article in article_list:
         print_metadata(article)
-        print_abstract(article)
+        # print_abstract(article)
         print_body(article)
