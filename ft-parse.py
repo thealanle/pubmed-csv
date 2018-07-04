@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 
-from bs4 import BeautifulSoup as bs
+from bs4 import BeautifulSoup
+
+
+class Article:
+    """
+    TODO: Implement a class representation of each journal article.
+    """
+    pass
 
 
 def print_pmids(article):
@@ -15,7 +22,7 @@ def print_pmids(article):
         # pmid 19686402
 
 
-def print_article_text(article):
+def print_all(article):
     text_list = article.find_all('p')
     for each in text_list:
         print(each.get_text())
@@ -35,33 +42,39 @@ def print_metadata(article):
     #     print(front.get_text())
 
 
-def print_full_text(article):
-    body = article.find('body')
-    p_list = body.find_all('p')
-    # secs = [sec for sec in body.find_all(
-    #     'sec') if 'supplementary' not in sec.attrs['sec-type']]
-
-    print(secs.get_text())
-    for p in p_list:
-        print(p.get_text())
-
-
 def print_abstract(article):
     abstract = article.find('abstract')
+
     print(abstract.get_text())
 
 
+def print_body(article):
+    body = article.find('body')
+    p_temp = body.find_all('p')
+    p_list = [p for p in p_temp if p.parent.name ==
+              'sec' and p.get_text != '\n']
+    text_list = []
+    # secs = [sec for sec in body.find_all(
+    #     'sec') if 'supplementary' not in sec.attrs['sec-type']]
+    #
+    # print(secs.get_text())
+    for p in p_list:
+        text_list.append(p.get_text())
+
+    print(' '.join(text_list))
+
+
 if __name__ == '__main__':
-    infile = open("xml_input/efetch-pmc.xml")
-    contents = infile.read()
-    soup = bs(contents, 'xml')
+
+    data_in = open("xml_input/efetch-pmc.xml")
+    contents = data_in.read()
+    soup = BeautifulSoup(contents, 'xml')
+    data_in.close()
 
     article_list = soup.find_all(['article'])
-    # print_article_text(article_list)
+    # print_all(article_list)
 
     for article in article_list:
         print_metadata(article)
         print_abstract(article)
-        print_full_text(article)
-
-    infile.close()
+        print_body(article)
