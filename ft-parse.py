@@ -2,7 +2,7 @@
 
 from bs4 import BeautifulSoup
 import csv
-# import collections
+import collections
 
 
 class Library:
@@ -16,12 +16,20 @@ class Library:
         soup = BeautifulSoup(contents, 'xml')
         data_in.close()
 
+        self.docs = collections.OrderedDict()
+
         # TODO: Create a list in which each element is a BeautifulSoup Tag
         # corresponding to a journal article.
-        self.articles = soup.find_all(['article'])
+        for article in soup.find_all(['article']):
+            doc = Document(article)
+            self.add_doc(doc)
+            # print(doc.metadata['body'])
 
     def export_csv(self, filename):  # Not yet implemented
         writer = csv.writer
+
+    def add_doc(self, doc):
+        self.docs[doc.metadata['journal-title']] = doc
 
 
 class Document:
@@ -31,20 +39,27 @@ class Document:
 
     def __init__(self, article):
         front = article.find('front')
+        body = article.find('body')
         self.metadata = {
             'journal-title': front.find('journal-title').string,
             'article-title': front.find('article-title').string,
             'first_author': front.find('contrib').find('surname').string,
             'year': front.find('year').string,
-            'fulltext': self.fulltext(article),
+            'body': self.get_body(body),
         }
 
-    def fulltext(self, article):
-        body = article.find('body')
+    def get_body(self, body, inline=True):
+
+        # Make a list of all strings under <p> tags
         p_list = [p.get_text()
                   for p in body.find_all('p') if p.parent.name == 'sec']
+
         text_list = [p.replace('\n', '') for p in p_list]
-        return ' '.join(text_list)
+
+        if inline:
+            return ' '.join(text_list)
+        else:
+            return '\n'.join(text_list)
 
 
 def print_pmids(article):
@@ -94,7 +109,6 @@ def print_body(article):
 
 if __name__ == '__main__':
     library = Library("xml_input/efetch-pmc.xml")
-    for article in library.articles:
-        doc = Document(article)
-        # print_metadata(article)
-        # print_body(article)
+    for doc in library.docs.values():
+        print(doc.metadata['article-title'])
+        print(doc.metadata['body'])
