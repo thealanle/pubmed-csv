@@ -25,12 +25,23 @@ class Library:
             self.add_doc(doc)
             # print(doc.meta['body'])
 
-    def export_csv(self, filename):  # Not yet implemented
-        writer = csv.writer
-
     # TODO: Update to use PMID or PMCID instead of title
     def add_doc(self, doc):
         self.docs[doc.meta['article-title']] = doc
+
+    def export_csv(self, filename):  # Not yet implemented
+        headers = [
+            'journal-title',
+            'article-title',
+            'first-author',
+            'year',
+            'body'
+        ]
+        with open(filename, encoding='utf-8', mode='w', newline='\n') as f_out:
+            writer = csv.DictWriter(f_out, fieldnames=headers)
+            writer.writeheader()
+            for doc in self.docs.values():
+                writer.writerow(doc.meta)
 
 
 class Document:
@@ -115,5 +126,6 @@ def print_body(article):
 
 if __name__ == '__main__':
     library = Library("xml_input/efetch-pmc.xml")
-    for doc in library.docs.values():
-        print(doc, '\n')
+    # for doc in library.docs.values():
+    #     print(doc, '\n')
+    library.export_csv('test.csv')
