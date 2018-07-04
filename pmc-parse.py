@@ -7,7 +7,7 @@ import collections
 
 class Library:
     """
-    TODO: Implement a container to enable access and modification of Documents.
+    A container for Documents. Handles writing of aggregate data to a .CSV file.
     """
 
     def __init__(self, filename):
@@ -18,8 +18,8 @@ class Library:
 
         self.docs = collections.OrderedDict()
 
-        # TODO: Create a list in which each element is a BeautifulSoup Tag
-        # corresponding to a journal article.
+        # Creates a Document object for each article and adds it to the
+        # Library's docs dict
         for article in soup.find_all(['article']):
             try:
                 doc = Document(article)
@@ -65,6 +65,9 @@ class Document:
         }
 
     def __str__(self):
+        """
+        Return select metadata elements as a printable string.
+        """
         summary = [doc.meta['article-title'],
                    doc.meta['first-author'] + ' ' + doc.meta['year'],
                    doc.meta['body']]
@@ -74,6 +77,9 @@ class Document:
             return ''
 
     def get_body(self, body, inline=True):
+        """
+        Return all primary body text as a single string without linebreaks.
+        """
 
         # Make a list of all strings under <p> tags
         temp = [p.get_text()
