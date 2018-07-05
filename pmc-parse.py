@@ -70,7 +70,8 @@ class Document:
         """
         summary = [doc.meta['article-title'],
                    doc.meta['first-author'] + ' ' + doc.meta['year'],
-                   doc.meta['body']]
+                   doc.meta['body']
+                   ]
         try:
             return '\n'.join(summary)
         except TypeError:
