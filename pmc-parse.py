@@ -114,9 +114,16 @@ class Document:
         result = ' '.join(text_list) if inline else '\n'.join(text_list)
 
         # Fix formatting errors from using .join()
-        result = result.replace('( ', '(')
-        result = result.replace(' )', ')')
-        result = result.replace(' ,', ',')
+        replacements = [
+            ('( ', '('),
+            (' )', ')'),
+            (' ,', ','),
+            # (' . ', '. '),
+            # (' (,)', ''),
+            # (' ()', ''),
+        ]
+        for key, value in replacements:
+            result = result.replace(key, value)
 
         return result
 
@@ -135,3 +142,4 @@ class Document:
 
 if __name__ == '__main__':
     library = Library("xml_input/pmcids-mini.xml")
+    library.export_txt('output.txt')
