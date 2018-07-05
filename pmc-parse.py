@@ -59,7 +59,7 @@ class Library:
         with open(filename, encoding='utf-8', mode='w') as f_out:
             for doc in self.docs.values():
                 f_out.writelines(doc.__str__())
-                f_out.write('\n')
+                f_out.write('\n\n')
 
     def remove_tag(self, tag):
         for each in self.soup.find_all(tag):
@@ -114,18 +114,18 @@ class Document:
         result = ' '.join(text_list) if inline else '\n'.join(text_list)
 
         # Fix formatting errors from using .join()
-        replacements = [
-            ('( ', '('),
-            (' )', ')'),
-            (' ,', ','),
-            # (' . ', '. '),
-            # (' (,)', ''),
-            # (' ()', ''),
-        ]
+        replacements = [('( ', '('), (' )', ')'), (' ,', ','),
+                        # (' . ', '. '),
+                        # (' (,)', ''),
+                        # (' ()', ''),
+                        ]
         for key, value in replacements:
             result = result.replace(key, value)
 
         return result
+
+    def get_ids(self, front):
+        pass
 
 
 # def print_pmids(article):
