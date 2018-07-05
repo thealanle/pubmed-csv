@@ -55,7 +55,7 @@ class Library:
 
     def remove_tag(self, tag):
         for each in self.soup.find_all(tag):
-            tag.decompose()
+            each.decompose()
 
 
 class Document:
