@@ -13,20 +13,26 @@ class Library:
     def __init__(self, filename):
         data_in = open(filename)
         contents = data_in.read()
-        soup = BeautifulSoup(contents, 'xml')
+        self.soup = BeautifulSoup(contents, 'xml')
         data_in.close()
 
         self.docs = collections.OrderedDict()
 
         # Creates a Document object for each article and adds it to the
         # Library's docs dict
-        for article in soup.find_all(['article']):
+        for article in self.soup.find_all(['article']):
             try:
                 doc = Document(article)
                 self.add_doc(doc)
                 # print(doc.meta['body'])
             except AttributeError:
                 pass
+
+    def __str__(self):
+        result = []
+        for doc in self.docs.values():
+            result.append(doc.__str__())
+        return '\n'.join(result)
 
     # TODO: Update to use PMID or PMCID instead of title
     def add_doc(self, doc):
@@ -46,6 +52,10 @@ class Library:
             writer.writeheader()
             for doc in self.docs.values():
                 writer.writerow(doc.meta)
+
+    def remove_tag(self, tag):
+        for each in self.soup.find_all(tag):
+            tag.decompose()
 
 
 class Document:
@@ -68,9 +78,9 @@ class Document:
         """
         Return select metadata elements as a printable string.
         """
-        summary = [doc.meta['article-title'],
-                   doc.meta['first-author'] + ' ' + doc.meta['year'],
-                   doc.meta['body']
+        summary = [self.meta['article-title'],
+                   self.meta['first-author'] + ' ' + self.meta['year'],
+                   self.meta['body']
                    ]
         try:
             return '\n'.join(summary)
@@ -83,12 +93,12 @@ class Document:
         """
 
         # Make a list of all strings under <p> tags
-        temp = [p.get_text()
-                for p in body.find_all('p') if p.parent.name == 'sec']
+        raw = [p.get_text()
+               for p in body.find_all('p') if p.parent.name == 'sec']
 
         # Use tokens to avoid whitespace errors
         text_list = []
-        for p in temp:
+        for p in raw:
             tokens = p.split()
             for each in tokens:
                 text_list.append(each)
@@ -96,20 +106,19 @@ class Document:
         return ' '.join(text_list) if inline else '\n'.join(text_list)
 
 
-def print_pmids(article):
-    # Get PMID from article
-    article_ids = [id_tag for id_tag in article.find_all(
-        'article-id') if id_tag.attrs['pub-id-type'] == 'pmid']
-    for tag in article_ids:
-        # id_list.append(' '.join([tag.attrs['pub-id-type'], tag.string]))
-        print(tag.attrs['pub-id-type'], tag.string)
-        # Output:
-        # pmid 25615823
-        # pmid 19686402
+# def print_pmids(article):
+#     # Get PMID from article
+#     article_ids = [id_tag for id_tag in article.find_all(
+#         'article-id') if id_tag.attrs['pub-id-type'] == 'pmid']
+#     for tag in article_ids:
+#         # id_list.append(' '.join([tag.attrs['pub-id-type'], tag.string]))
+#         print(tag.attrs['pub-id-type'], tag.string)
+#         # Output:
+#         # pmid 25615823
+#         # pmid 19686402
 
 
 if __name__ == '__main__':
     library = Library("xml_input/pmcids-mini.xml")
-    for doc in library.docs.values():
-        print(doc, '\n')
+
     # library.export_csv('test.csv')
