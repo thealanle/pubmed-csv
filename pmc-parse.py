@@ -17,7 +17,6 @@ class Library:
         data_in.close()
 
         self.docs = collections.OrderedDict()
-
         # Creates a Document object for each article and adds it to the
         # Library's docs dict
         for article in self.soup.find_all(['article']):
@@ -103,7 +102,13 @@ class Document:
             for each in tokens:
                 text_list.append(each)
 
-        return ' '.join(text_list) if inline else '\n'.join(text_list)
+        result = ' '.join(text_list) if inline else '\n'.join(text_list)
+
+        # Fix formatting errors from using .join()
+        result = result.replace('( ', '(')
+        result = result.replace(' )', ')')
+
+        return result
 
 
 # def print_pmids(article):
@@ -120,5 +125,5 @@ class Document:
 
 if __name__ == '__main__':
     library = Library("xml_input/pmcids-mini.xml")
-
-    # library.export_csv('test.csv')
+print(library)
+# library.export_csv('test.csv')
