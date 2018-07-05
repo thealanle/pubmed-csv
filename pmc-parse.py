@@ -17,6 +17,9 @@ class Library:
         data_in.close()
 
         self.docs = collections.OrderedDict()
+        # self.remove_tag('sup')
+        # self.remove_tag('xref')
+        self.remove_tag('table-wrap')
         # Creates a Document object for each article and adds it to the
         # Library's docs dict
         for article in self.soup.find_all(['article']):
