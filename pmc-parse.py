@@ -86,10 +86,7 @@ class Document:
                 for p in body.find_all('p') if p.parent.name == 'sec']
         text_list = [p.replace('\n', '') for p in temp]
 
-        if inline:
-            return ' '.join(text_list)
-        else:
-            return '\n'.join(text_list)
+        return ''.join(text_list) if inline else '\n'.join(text_list)
 
 
 def print_pmids(article):
