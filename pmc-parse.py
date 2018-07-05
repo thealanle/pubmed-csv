@@ -85,9 +85,15 @@ class Document:
         # Make a list of all strings under <p> tags
         temp = [p.get_text()
                 for p in body.find_all('p') if p.parent.name == 'sec']
-        text_list = [p.replace('\n', '') for p in temp]
 
-        return ''.join(text_list) if inline else '\n'.join(text_list)
+        # Use tokens to avoid whitespace errors
+        text_list = []
+        for p in temp:
+            tokens = p.split()
+            for each in tokens:
+                text_list.append(each)
+
+        return ' '.join(text_list) if inline else '\n'.join(text_list)
 
 
 def print_pmids(article):
@@ -106,4 +112,4 @@ if __name__ == '__main__':
     library = Library("xml_input/pmcids-mini.xml")
     for doc in library.docs.values():
         print(doc, '\n')
-    library.export_csv('test.csv')
+    # library.export_csv('test.csv')
