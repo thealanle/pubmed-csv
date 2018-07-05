@@ -125,5 +125,5 @@ class Document:
 
 if __name__ == '__main__':
     library = Library("xml_input/pmcids-mini.xml")
-print(library)
+    print(library)
 # library.export_csv('test.csv')
