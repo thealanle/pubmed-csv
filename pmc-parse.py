@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""Parse and organize information from articles exported from PubMed as XML.
+
+"""
 
 from bs4 import BeautifulSoup
 import csv
@@ -6,8 +9,11 @@ import collections
 
 
 class Library:
-    """
-    A container for Documents. Handles writing of aggregate data to a .CSV file.
+
+    """Handle bulk processing of articles and export their data.
+
+    Args:
+        filename (str): The path of the XML file containing article data
     """
 
     def __init__(self, filename):
@@ -40,7 +46,7 @@ class Library:
     def add_doc(self, doc):
         self.docs[doc.meta['article-title']] = doc
 
-    def export_csv(self, filename):  # Not yet implemented
+    def export_csv(self, filename):
         headers = [
             'journal-title',
             'article-title',
@@ -48,7 +54,6 @@ class Library:
             'year',
             'body'
         ]
-
         with open(filename, encoding='utf-8', mode='w', newline='\n') as f_out:
             writer = csv.DictWriter(f_out, fieldnames=headers)
             writer.writeheader()
@@ -67,8 +72,11 @@ class Library:
 
 
 class Document:
-    """
-    An article with its properties parsed out for access and modification.
+    """An article with its properties parsed out for access and modification.
+
+    Args:
+        article (Tag): A subset of a BeautifulSoup object.
+
     """
 
     def __init__(self, article):
@@ -143,3 +151,4 @@ class Document:
 if __name__ == '__main__':
     library = Library("xml_input/pmcids-mini.xml")
     library.export_txt('output.txt')
+    library.export_csv('output.csv')
