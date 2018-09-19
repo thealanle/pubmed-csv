@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+
+Given a file containing PMIDs, return a text file containing the abstracts
+extracted from the associated articles.
+
+"""
 
 from Bio import Entrez
 import csv
