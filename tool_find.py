@@ -8,7 +8,10 @@ import sys
 
 This tool is designed to find names of interest using different heuristic
 methods. Command line arguments are used to specify the input and output
-files. This should take the form: 'tool_find.py input.csv output.csv'
+files.
+
+Usage:
+    tool_find.py input.csv output.csv
 
 """
 
@@ -99,7 +102,17 @@ def tokenize(s):
     return result
 
 
-def export_csv():
+def export_csv(filename):
+
+    with open(filename, 'w', newline='') as f_out:
+        writer = csv.writer(f_out, delimiter=',')
+        writer.writerow(['Title', 'Parentheses', 'Abbreviation', 'Initials'])
+
+        for key, value in sorted(results.items()):
+            try:
+                writer.writerow([key, value[0], value[1], str(value[2])])
+            except IndexError:
+                writer.writerow([key, value])
     pass
 
 
@@ -126,12 +139,4 @@ if __name__ == '__main__':
         else:
             results[title] = ['', '', '']
 
-    with open(sys.argv[2], 'w', newline='') as f_out:
-        writer = csv.writer(f_out, delimiter=',')
-        writer.writerow(['Title', 'Parentheses', 'Abbreviation', 'Initials'])
-
-        for key, value in sorted(results.items()):
-            try:
-                writer.writerow([key, value[0], value[1], str(value[2])])
-            except IndexError:
-                writer.writerow([key, value])
+    export_csv(sys.argv[2])
