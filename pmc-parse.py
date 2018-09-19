@@ -21,6 +21,7 @@ class Library:
         contents = data_in.read()
         self.soup = BeautifulSoup(contents, 'xml')
         data_in.close()
+        self.ft_unavailable = []
 
         self.docs = collections.OrderedDict()
         # self.remove_tag('sup')
@@ -34,6 +35,7 @@ class Library:
                 self.add_doc(doc)
                 # print(doc.meta['body'])
             except AttributeError:
+                self.ft_unavailable.append(article)
                 pass
 
     def __str__(self):
@@ -69,6 +71,9 @@ class Library:
     def remove_tag(self, tag):
         for each in self.soup.find_all(tag):
             each.decompose()
+
+    def count(self):
+        print(len(self.docs) + self.ft_unavailable)
 
 
 class Document:
@@ -152,3 +157,4 @@ if __name__ == '__main__':
     library = Library("xml_input/pmcids-mini.xml")
     library.export_txt('output.txt')
     library.export_csv('output.csv')
+    library.count()
