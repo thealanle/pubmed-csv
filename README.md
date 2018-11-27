@@ -4,9 +4,8 @@ Under construction using the [biopython](https://github.com/biopython/biopython)
 Data is collected using the [NCBI Entrez E-Utilities API](https://www.ncbi.nlm.nih.gov/books/NBK25501/).
 
 ## Objectives:
-- ingest articles in PDF form and output them as text.
-- retrieve article data given a file containing PMIDs
-- output article properties to .csv format
+- ingest articles in PDF or xml form and retrieve article properties
+- associate articles with Common Data Elements
 
 
 ## Usage:
